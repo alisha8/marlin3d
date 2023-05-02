@@ -51,6 +51,10 @@
 #include "stepper.h"
 #include "temperature.h"
 
+#if ENABLED(CREALITY_RTS)
+  #include "../lcd/rts/lcd_rts.h"
+#endif
+
 #include "../lcd/marlinui.h"
 #include "../libs/vector_3.h"   // for matrix_3x3
 #include "../gcode/gcode.h"
@@ -674,6 +678,17 @@ typedef struct SettingsDataStruct {
     uint8_t stealth_mode;         // EEPROM_MMU_STEALTH
     bool mmu_hw_enabled;          // EEPROM_MMU_ENABLED
     // uint32_t material_changes
+  #endif
+
+  //
+  // Creality RTS
+  //
+  #if ENABLED(CREALITY_RTS)
+    bool wifi_enable_flag;                              // M194 S
+    #if ENABLED(BLTOUCH_AND_Z_LIMIT)
+      float zCoordinateOffset;                          // RTS Z offset
+    #endif
+    float bedNozzleHeightCalZ;
   #endif
 
 } SettingsData;
@@ -1734,6 +1749,15 @@ void MarlinSettings::postprocess() {
     //
     #if HAS_MULTI_LANGUAGE
       EEPROM_WRITE(ui.language);
+    #endif
+
+    #if ENABLED(CREALITY_RTS)
+      _FIELD_TEST(wifi_enable_flag);
+      EEPROM_WRITE(wifi_enable_flag);
+      #if ENABLED(BLTOUCH_AND_Z_LIMIT)
+        EEPROM_WRITE(rts.zCoordinateOffset);         // Z轴空间坐标差
+      #endif
+      EEPROM_WRITE(bedNozzleHeightCalZ); // caixiaoliang add 20210807
     #endif
 
     //
@@ -2856,6 +2880,13 @@ void MarlinSettings::postprocess() {
       }
       #endif
 
+      #if ENABLED(CREALITY_RTS)
+        _FIELD_TEST(wifi_enable_flag);
+        EEPROM_READ(wifi_enable_flag);
+        EEPROM_READ(rts.zCoordinateOffset); // rock_20220730
+        EEPROM_READ(bedNozzleHeightCalZ); // caixiaoliang add 20210807
+      #endif
+
       //
       // Model predictive control
       //
@@ -3703,6 +3734,11 @@ void MarlinSettings::reset() {
     DEBUG_ECHOLNPGM("Digipot Written");
   #endif
 
+  #if ENABLED(CREALITY_RTS)
+    ui.language = 1; // 0:Chinese, 1:English
+    wifi_enable_flag = true;
+  #endif
+
   //
   // Adaptive Step Smoothing state
   //
@@ -4153,6 +4189,12 @@ void MarlinSettings::reset() {
     // MMU3
     //
     TERN_(HAS_PRUSA_MMU3, gcode.MMU3_report(forReplay));
+
+    #if ENABLED(CREALITY_RTS)
+      CONFIG_ECHO_HEADING("WIFI Enabled");
+      CONFIG_ECHO_MSG("  M194 S", wifi_enable_flag);
+      //SERIAL_ECHOLNPGM("  rts.zCoordinateOffset ! ", rts.zCoordinateOffset);
+    #endif
   }
 
 #endif // !DISABLE_M503

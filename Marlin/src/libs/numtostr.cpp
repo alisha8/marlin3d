@@ -25,6 +25,9 @@
 #include "../inc/MarlinConfigPre.h"
 #include "../core/utility.h"
 
+#define DEBUG_OUT 1
+#include "../core/debug_out.h"
+
 char conv[9] = { 0 };
 
 #define DIGIT(n) ('0' + (n))
@@ -384,6 +387,32 @@ const char* ftostr61rj(const_float_t f) {
   return &conv[1];
 }
 
+// Converts float to string representing its absolute value with up to 8 characters including decimal dot, right aligned, example: ____5678, ____5.67, ___45.67, __345.67, _2345.67, 12345.67
+/**
+ * IMPORTANT: Supports only floats that can be displayed by above mentioned format
+ * IMPORTANT: Float is represented by somewhat revered scientific notation using two parameters, from which float can be acquired by dividing: @param intVal / @param decimal
+ * @param intVal significant digits of float
+ * @param decimal divisor to acquire the float, must be power of 10
+ * */ 
+const char* ftostr7xrj(int32_t intVal, uint32_t decimal) {
+  
+  if (intVal < 0) intVal *= -1;
+
+  int8_t intEnd = 7;
+  uint8_t dig = 0;
+  uint32_t div = 1;
+  for (;intEnd >= 0 && (((float)intVal / div) >= 1 || ((float)decimal / div) >= 1);intEnd--) {
+    dig = (intVal / div) % 10;
+    if (decimal == div && intEnd > 0 && intEnd < 7) {
+      conv[intEnd--] = '.';
+    }
+    conv[intEnd] = DIGIT(dig);
+    div *= 10;
+  }
+
+  return &conv[intEnd+1];
+}
+
 // Convert unsigned float to string with ____5.67, ___45.67, __345.67, _2345.67, 12345.67 format
 const char* ftostr72rj(const_float_t f) {
   const long i = UINTFLOAT(f, 2);
@@ -424,6 +453,48 @@ const char* ftostr52sp(const_float_t f) {
   return &conv[1];
 }
 
+const char* ftostr52custom(const_float_t f) {
+  long i = INTFLOAT(f, 3);
+  if (i < 0) i = -i; 
+  
+  uint8_t dig;
+  uint8_t intEnd = 7;
+
+  if ((dig = i % 10)) {          // third digit after decimal point?
+    conv[4] = '.';
+    conv[5] = DIGIMOD(i, 100);
+    conv[6] = DIGIMOD(i, 10);
+    conv[7] = DIGIT(dig);
+    intEnd = 3;
+  }
+  else if ((dig = (i / 10) % 10)) {          // second digit after decimal point?
+    conv[5] = '.';
+    conv[6] = DIGIMOD(i, 100);
+    conv[7] = DIGIT(dig);
+    intEnd = 4;
+  }
+  else if ((dig = (i / 100) % 10)) { // first digit after decimal point?
+      conv[6] = '.';
+      conv[7] = DIGIT(dig);
+      intEnd = 5;
+  }
+
+  conv[intEnd--] = DIGIMOD(i, 1000);
+  conv[intEnd--] = RJDIGIT(i, 10000);
+  conv[intEnd] = RJDIGIT(i,   100000);
+  
+  for(;intEnd < 8;intEnd++){
+    if (conv[intEnd] != ' ' && ((i % 10) == 0 || conv[intEnd] != '0')) { //todo this should be moved under a flag or sep func
+      if (f < 0) {
+        conv[--intEnd] = '-';
+      }
+      return &conv[intEnd];
+    }
+  }
+  
+  return &conv[0];
+}
+
 // Convert unsigned 16bit int to string 1, 12, 123 format, capped at 999
 const char* utostr3(const uint16_t x) {
   return i16tostr3left(_MIN(x, 999U));
@@ -453,4 +524,40 @@ const char* ftostr52sprj(const_float_t f) {
   conv[7] = DIGIMOD(i, 1);
 
   return &conv[1];
+}
+
+const char* shortenNum(const char * convptr, bool removeWhole0, bool removeUnit) {
+
+  //todo implementation behaves as if removeWhole0 and removeUnit were true
+
+  uint8_t intStart = 7;
+  uint8_t returnStart = 8;
+  bool numberFound = false;
+  int8_t decimalIdx = -1;
+  int i = 0;
+
+  while (convptr[i] != 0) {
+    if (convptr[i] == '.') { decimalIdx = i; }
+    i++;
+  }
+  
+  for (i--; i >= 0 ;) {
+    if (convptr[i] == ' ' || convptr[i] == '%' || (!numberFound && decimalIdx != -1 && decimalIdx <= i && (convptr[i] == '0' || convptr[i] == '.'))) {
+    } else {
+      numberFound = true;
+      conv[intStart] = convptr[i];
+      if ((decimalIdx > -1 && i >= decimalIdx) || convptr[i] != '0') {
+        returnStart = intStart;  
+        if (convptr[i] == '-') {
+          conv[returnStart] = '-';
+        }
+      }
+      intStart--;
+    }
+    i--;
+  }
+
+  if (returnStart == 8) { returnStart--; }
+  
+  return &conv[returnStart];
 }

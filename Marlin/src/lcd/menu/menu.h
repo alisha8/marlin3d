@@ -158,6 +158,8 @@ class MenuEditItemBase : public MenuItemBase {
     static FSTR_P editLabel;
     static void *editValue;
     static int32_t minEditValue, maxEditValue;  // Encoder value range
+    static float valueStep;
+    static intptr_t valueToString;
     static screenFunc_t callbackFunc;
     static bool liveEdit;
   protected:
@@ -168,6 +170,8 @@ class MenuEditItemBase : public MenuItemBase {
       void * const ev,        // Edit value pointer
       const int32_t minv,     // Encoder minimum
       const int32_t maxv,     // Encoder maximum
+      const float scale,
+      intptr_t to_string,
       const uint16_t ep,      // Initial encoder value
       const screenFunc_t cs,  // MenuItem_type::draw_edit_screen => MenuEditItemBase::edit()
       const screenFunc_t cb,  // Callback after edit
@@ -189,6 +193,7 @@ class MenuEditItemBase : public MenuItemBase {
 
     // This method is for the current menu item
     static void draw_edit_screen(const char * const value) { draw_edit_screen(editLabel, value); }
+    static void put_new_value(float val); //todo fix this should not be here or preprocessor controlled, this is TFT_COLOR_UI with touch specific
 };
 
 #if HAS_MEDIA

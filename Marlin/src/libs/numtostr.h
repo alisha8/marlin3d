@@ -107,6 +107,8 @@ const char* ftostr51sign(const_float_t x);
 // Convert signed float to space-padded string with -_23.4_ format
 const char* ftostr52sp(const_float_t x);
 
+const char* ftostr52custom(const_float_t f);
+
 // Convert signed float to string with +123.45 format
 const char* ftostr52sign(const_float_t x);
 
@@ -115,6 +117,9 @@ const char* ftostr53sign(const_float_t f);
 
 // Convert unsigned float to string with 12345.6 format omitting trailing zeros
 const char* ftostr61rj(const_float_t x);
+
+// Convert usigned float to string with ____5.67, ___45.67, __345.67, _2345.67, 12345.67 format
+const char* ftostr7xrj(int32_t intVal, uint32_t decimal);
 
 // Convert unsigned float to string with 12345.67 format omitting trailing zeros
 const char* ftostr72rj(const_float_t x);
@@ -135,3 +140,5 @@ const char* utostr3(const uint16_t x);
 
 // Convert signed float to space-padded string with 1.23, 12.34, 123.45 format
 const char* ftostr52sprj(const_float_t f);
+
+const char* shortenNum(const char * convptr, bool removeWhole0 = true, bool removeUnit = true);

@@ -392,8 +392,8 @@ void do_blocking_move_to(const xyze_pos_t &raw, const_feedRate_t fr_mm_s=0.0f);
   void do_blocking_move_to_xyzijku_v(const xyze_pos_t &raw, const_float_t v, const_feedRate_t fr_mm_s=0.0f);
 #endif
 #if HAS_W_AXIS
-  void do_blocking_move_to_w(const float rw, const feedRate_t &fr_mm_s=0.0f);
-  void do_blocking_move_to_xyzijkuv_w(const xyze_pos_t &raw, const float w, const feedRate_t &fr_mm_s=0.0f);
+  void do_blocking_move_to_w(const_float_t rw, const feedRate_t &fr_mm_s=0.0f);
+  void do_blocking_move_to_xyzijkuv_w(const xyze_pos_t &raw, const_float_t w, const feedRate_t &fr_mm_s=0.0f);
 #endif
 
 #if HAS_Y_AXIS
@@ -559,9 +559,9 @@ void home_if_needed(const bool keeplev=false);
   #endif
 
   // Return true if the given point is within the printable area
-  bool position_is_reachable(const_float_t rx, const_float_t ry, const float inset=0);
+  bool position_is_reachable(const_float_t rx, const_float_t ry, const_float_t inset=0.0f);
 
-  inline bool position_is_reachable(const xy_pos_t &pos, const float inset=0) {
+  inline bool position_is_reachable(const xy_pos_t &pos, const_float_t inset=0.0f) {
     return position_is_reachable(pos.x, pos.y, inset);
   }
 

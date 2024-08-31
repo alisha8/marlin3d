@@ -773,6 +773,7 @@
  */
 #define MAX_BED_POWER 255 // limits duty cycle to bed; 255=full current
 
+
 /**
  * PID Bed Heating
  *
@@ -800,6 +801,46 @@
   // FIND YOUR OWN: "M303 E-1 C8 S90" to run autotune on the bed at 90 degreesC for 8 cycles.
 #else
   //#define BED_LIMIT_SWITCHING   // Keep the bed temperature within BED_HYSTERESIS of the target
+#endif
+
+/**
+ * Peltier Logic
+ * A Peltier chip is a device that can transfer heat from one side to the other
+ * proportional to the amount of current flowing through the device.  It is reversable.
+ * The same device can both heat or cool a side depending on the direction of current flow.
+ * Because of existing eqipment made to handle relatively high current for the
+ * heated bed in 3D printing the "Heated Bed" is used for the power control point for the Peltier.
+ * 
+ * When "cooling" in addition to rejecting the heat transferred from hot side to 
+ * cool side the power dissapted by the Peltier unit (voltage x current) must also be rejected.
+ * Peltier Fan control needs to work in tandem with unit energization.  Some form of fan is required with
+ * a Peltier heat exchanger that is no implemented here.
+ * 
+ * Peltier units are typically run in bang-bang mode.  They don't do well with PWM
+ * unless special filter circuitry is installed.  PWM not supported at this time.
+ * 
+ * Peltier logic uses Heated bed gcode at this time (Peltier in place of heated bed)
+ * Another pin or pins must be used to control the direction of current to the peltier.
+ * Two configurations are possible: Relay and H-Bridge
+ * only relay is supported on this pass. (H bridge requires 4 MOS switches configured in H-Bridge)
+ * //todo: H bridge pin configurations
+ */
+//#define HAS_PELTIER 1
+/**
+ * HAS_PELTIER is master switch for function
+ * HAS_PELTIER uses heated bed control pins for the Peltier Power
+ * 
+ * PELTIER_PIN is the control pin for relay switching
+ * In the initial application heat is less common than cool
+ * Heating: Relay Energized
+ * Cooling: Relay in "Normal" state
+ * (Power is determined by Heated Bed setting - 0 or 255 )
+ * 
+ * PELTIER_PIN_INVERT will invert the logic on write to the relay.
+  */
+#if ENABLED(HAS_PELTIER)
+  #define PELTIER_PIN 47
+  #define PELTIER_PIN_INVERT true
 #endif
 
 // Add 'M190 R T' for more gradual M190 R bed cooling.

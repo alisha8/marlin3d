@@ -724,6 +724,7 @@ namespace LanguageNarrow_en {
   LSTR MSG_LOCKSCREEN_LOCKED              = _UxGT("Printer is Locked,");      // ProUI
   LSTR MSG_LOCKSCREEN_UNLOCK              = _UxGT("Scroll to unlock.");       // ProUI
   LSTR MSG_PLEASE_WAIT_REBOOT             = _UxGT("Please wait for reboot."); // ProUI
+  LSTR MSG_REVERSE_ENCODER                = _UxGT("Reverse Encoder");         // ProUI
   LSTR MSG_MEDIA_NOT_INSERTED             = _UxGT("No Media");                // ProUI
   LSTR MSG_PLEASE_PREHEAT                 = _UxGT("Please Preheat");          // ProUI
 

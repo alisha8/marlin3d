@@ -578,7 +578,9 @@ typedef struct SettingsDataStruct {
     touch_calibration_t touch_calibration_data;
   #endif
 
+  //
   // Ethernet settings
+  //
   #if HAS_ETHERNET
     bool ethernet_hardware_enabled;                     // M552 S
     uint32_t ethernet_ip,                               // M552 P
@@ -592,6 +594,13 @@ typedef struct SettingsDataStruct {
   //
   #if ENABLED(SOUND_MENU_ITEM)
     bool sound_on;
+  #endif
+
+  //
+  // Toggle the meshviwer
+  //
+  #if USE_GRID_MESHVIEWER
+    bool view_mesh;
   #endif
 
   //
@@ -611,6 +620,9 @@ typedef struct SettingsDataStruct {
     celsius_t mks_min_extrusion_temp;                   // Min E Temp (shadow M302 value)
   #endif
 
+  //
+  // LCD has Language > 1
+  //
   #if HAS_MULTI_LANGUAGE
     uint8_t ui_language;                                // M414 S
   #endif
@@ -1710,6 +1722,13 @@ void MarlinSettings::postprocess() {
     //
     #if ENABLED(SOUND_MENU_ITEM)
       EEPROM_WRITE(ui.sound_on);
+    #endif
+
+    //
+    // Toggle the meshviewer
+    //
+    #if USE_GRID_MESHVIEWER
+      EEPROM_WRITE(bedLevelTools.view_mesh);
     #endif
 
     //
@@ -2826,6 +2845,14 @@ void MarlinSettings::postprocess() {
       #endif
 
       //
+      // Toggle the meshviewer
+      //
+      #if USE_GRID_MESHVIEWER
+        _FIELD_TEST(view_mesh);
+        EEPROM_READ(bedLevelTools.view_mesh);
+      #endif
+
+      //
       // Fan tachometer check
       //
       #if HAS_FANCHECK
@@ -3377,9 +3404,12 @@ void MarlinSettings::reset() {
   //
   // Buzzer enable/disable
   //
-  #if ENABLED(SOUND_MENU_ITEM)
-    ui.sound_on = ENABLED(SOUND_ON_DEFAULT);
-  #endif
+  TERN_(SOUND_MENU_ITEM, ui.sound_on = ENABLED(SOUND_ON_DEFAULT));
+
+  //
+  // Toggle the meshviewer
+  //
+  TERN_(USE_GRID_MESHVIEWER, bedLevelTools.view_mesh = false);
 
   //
   // Magnetic Parking Extruder

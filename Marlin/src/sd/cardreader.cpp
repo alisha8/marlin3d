@@ -40,6 +40,10 @@
   #include "../lcd/e3v2/creality/dwin.h"
 #endif
 
+#if ENABLED(CREALITY_RTS)
+  #include "../lcd/rts/lcd_rts.h"
+#endif
+
 #include "../module/planner.h"        // for synchronize
 #include "../module/printcounter.h"
 #include "../gcode/queue.h"
@@ -481,6 +485,7 @@ void CardReader::printSelectedFilename() {
 }
 
 void CardReader::mount() {
+  delay(5);
   flag.mounted = false;
   nrItems = -1;
   if (root.isOpen()) root.close();
@@ -1429,6 +1434,8 @@ void CardReader::fileHasFinished() {
 
   flag.sdprintdone = true;                    // Stop getting bytes from the SD card
   marlin_state = MarlinState::MF_SD_COMPLETE; // Tell Marlin to enqueue M1001 soon
+
+  TERN_(CREALITY_RTS, RTS_SDFileCompleted());
 }
 
 #if ENABLED(AUTO_REPORT_SD_STATUS)
